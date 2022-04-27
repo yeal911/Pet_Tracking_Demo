@@ -1,0 +1,65 @@
+[
+  {
+    "mapFeature": "landcover.parkland",
+    "options": "geometry.fill",
+    "paint": {
+      "color": "#bbf7bb"
+    },
+    "visibility": true
+  },
+  {
+    "mapFeature": "landcover.parkland.human-made",
+    "options": "geometry.fill",
+    "visibility": true,
+    "paint": {
+      "color": "#9dfb9d"
+    }
+  },
+  {
+    "mapFeature": "landcover.parkland.public-garden",
+    "options": "geometry.fill",
+    "visibility": true,
+    "paint": {
+      "color": "#06ea2c"
+    }
+  },
+  {
+    "mapFeature": "landcover.hospital",
+    "options": "geometry.fill",
+    "visibility": true,
+    "paint": {
+      "color": "#f56161"
+    }
+  },
+  {
+    "mapFeature": "landcover.human-made.Garden Path",
+    "options": "geometry.fill",
+    "paint": {
+      "color": "#fb041d"
+    }
+  },
+  {
+    "mapFeature": "landcover.attraction",
+    "options": "labels.text",
+    "paint": {
+      "color": "#f02805"
+    },
+    "visibility": false
+  },
+  {
+    "mapFeature": "road.city-arterial",
+    "options": "geometry.fill",
+    "paint": {
+      "color": "#2309ec"
+    },
+    "visibility": false
+  },
+  {
+    "mapFeature": "road.sidewalk",
+    "options": "geometry.fill",
+    "visibility": true,
+    "paint": {
+      "color": "#27ed0c"
+    }
+  }
+]
