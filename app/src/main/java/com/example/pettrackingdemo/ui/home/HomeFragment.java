@@ -206,7 +206,7 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
                 AGConnectAuthCredential credential = HwIdAuthProvider.credentialWithToken(authAccount.getAccessToken());
                 AGConnectAuth.getInstance().signIn(credential).addOnSuccessListener(signInResult -> {
                     // onSuccess
-                    MyApplication.initAppData(getActivity().getParent());
+                    MyApplication.initAppData(getActivity());
                     setLoginUser();
                 }).addOnFailureListener(e -> {
                     // onFail
