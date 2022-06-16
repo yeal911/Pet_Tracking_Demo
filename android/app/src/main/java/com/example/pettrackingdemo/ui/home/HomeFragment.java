@@ -22,7 +22,9 @@ import androidx.lifecycle.ViewModelProvider;
 import com.bumptech.glide.Glide;
 import com.example.pettrackingdemo.databinding.FragmentHomeBinding;
 import com.example.pettrackingdemo.db.CloudDBOperator;
+import com.example.pettrackingdemo.host.response.PetTrackingItem;
 import com.example.pettrackingdemo.tool.MyApplication;
+import com.example.pettrackingdemo.tool.PetTrackingController;
 import com.google.android.material.navigation.NavigationView;
 import com.huawei.agconnect.auth.AGConnectAuth;
 import com.huawei.agconnect.auth.AGConnectAuthCredential;
@@ -37,11 +39,14 @@ import com.example.pettrackingdemo.R;
 import com.huawei.hms.maps.OnMapReadyCallback;
 import com.example.pettrackingdemo.tool.PermissionManager;
 import com.huawei.hms.maps.model.MapStyleOptions;
+import com.huawei.hms.maps.model.Marker;
 import com.huawei.hms.support.account.AccountAuthManager;
 import com.huawei.hms.support.account.request.AccountAuthParams;
 import com.huawei.hms.support.account.request.AccountAuthParamsHelper;
 import com.huawei.hms.support.account.result.AuthAccount;
 import com.huawei.hms.support.account.service.AccountAuthService;
+
+import java.util.ArrayList;
 
 public class HomeFragment extends Fragment implements OnMapReadyCallback {
 
@@ -98,7 +103,22 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
         hMap.setMyLocationEnabled(true);
         hMap.getUiSettings().setMyLocationButtonEnabled(true);
         hMap.setLanguage("en");
+        PetTrackingController.getInstance().getTracking(new PetTrackingController.PetTrackingCallback() {
+            @Override
+            public void onPetTrackingResponse(ArrayList<PetTrackingItem> trackingItems) {
+
+            }
+
+            @Override
+            public void onError(Throwable throwable) {
+
+            }
+        });
     }
+
+//    public void addMarker(){
+////        Marker marker = new Marker();
+////    }
 
     @Override
     public void onResume() {

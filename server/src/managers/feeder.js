@@ -2,7 +2,6 @@ const Pet = require("../model/pet.js");
 const User = require("../model/user.js");
 const { v4: uuidv4 } = require("uuid");
 const databaseCtrl = require("../utils/clouddb");
-var credential = "./agc-apiclient-912931775108369536-7108610245037015320.json";
 
 
 async function getPet() {
