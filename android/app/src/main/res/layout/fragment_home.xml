@@ -21,7 +21,7 @@
         android:id="@+id/readTrackbutton"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Read Track"
+        android:text="Route"
         app:layout_constraintEnd_toStartOf="@+id/switch1"
         app:layout_constraintStart_toEndOf="@+id/userImageView"
         app:layout_constraintBottom_toTopOf="@+id/huaweiMap"

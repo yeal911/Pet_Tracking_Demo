@@ -2,15 +2,16 @@ package com.example.pettrackingdemo.ui.home;
 
 import android.Manifest;
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.ImageView;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -22,24 +23,34 @@ import androidx.lifecycle.ViewModelProvider;
 import com.bumptech.glide.Glide;
 import com.example.pettrackingdemo.databinding.FragmentHomeBinding;
 import com.example.pettrackingdemo.db.CloudDBOperator;
-import com.example.pettrackingdemo.host.response.PetTrackingItem;
+import com.example.pettrackingdemo.host.internal.PetTrackingItem;
+import com.example.pettrackingdemo.host.internal.Position;
+import com.example.pettrackingdemo.host.internal.Route;
+import com.example.pettrackingdemo.host.internal.RouteHostAdapter;
+import com.example.pettrackingdemo.host.internal.RouteService;
+import com.example.pettrackingdemo.host.internal.Routes;
+import com.example.pettrackingdemo.host.internal.Step;
+import com.example.pettrackingdemo.tool.LocationManager;
 import com.example.pettrackingdemo.tool.MyApplication;
 import com.example.pettrackingdemo.tool.PetTrackingController;
+import com.example.pettrackingdemo.tool.RouteController;
 import com.google.android.material.navigation.NavigationView;
 import com.huawei.agconnect.auth.AGConnectAuth;
 import com.huawei.agconnect.auth.AGConnectAuthCredential;
 import com.huawei.agconnect.auth.AGConnectUser;
 import com.huawei.agconnect.auth.HwIdAuthProvider;
 import com.huawei.hmf.tasks.Task;
+import com.huawei.hms.maps.CameraUpdate;
+import com.huawei.hms.maps.CameraUpdateFactory;
 import com.huawei.hms.maps.HuaweiMap;
-import com.huawei.hms.maps.HuaweiMapOptions;
-import com.huawei.hms.maps.MapFragment;
 import com.huawei.hms.maps.MapView;
 import com.example.pettrackingdemo.R;
 import com.huawei.hms.maps.OnMapReadyCallback;
 import com.example.pettrackingdemo.tool.PermissionManager;
-import com.huawei.hms.maps.model.MapStyleOptions;
+import com.huawei.hms.maps.model.LatLng;
 import com.huawei.hms.maps.model.Marker;
+import com.huawei.hms.maps.model.MarkerOptions;
+import com.huawei.hms.maps.model.PolylineOptions;
 import com.huawei.hms.support.account.AccountAuthManager;
 import com.huawei.hms.support.account.request.AccountAuthParams;
 import com.huawei.hms.support.account.request.AccountAuthParamsHelper;
@@ -47,6 +58,7 @@ import com.huawei.hms.support.account.result.AuthAccount;
 import com.huawei.hms.support.account.service.AccountAuthService;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class HomeFragment extends Fragment implements OnMapReadyCallback {
 
@@ -57,6 +69,7 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
     private View root;
 
     private final int SIGN_CODE = 100;
+    private  LatLng currentLocation;
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
@@ -95,7 +108,7 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
     public void onMapReady(HuaweiMap huaweiMap) {
         Log.d(TAG, "onMapReady: ");
 
-        if (!PermissionManager.RequestPermissions(root.getContext(), Manifest.permission.ACCESS_COARSE_LOCATION ) || !PermissionManager.RequestPermissions(root.getContext(), Manifest.permission.ACCESS_FINE_LOCATION ))
+        if (!PermissionManager.RequestPermissions(root.getContext(), Manifest.permission.ACCESS_COARSE_LOCATION) || !PermissionManager.RequestPermissions(root.getContext(), Manifest.permission.ACCESS_FINE_LOCATION))
             return;
 
         hMap = huaweiMap;
@@ -103,22 +116,90 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
         hMap.setMyLocationEnabled(true);
         hMap.getUiSettings().setMyLocationButtonEnabled(true);
         hMap.setLanguage("en");
+
         PetTrackingController.getInstance().getTracking(new PetTrackingController.PetTrackingCallback() {
             @Override
             public void onPetTrackingResponse(ArrayList<PetTrackingItem> trackingItems) {
+                int index = 1;
+                LatLng[] values = new LatLng[trackingItems.size()];
+                for (PetTrackingItem item : trackingItems) {
+                    if (item.getLat() != null && item.getLon() != null) {
+                        LatLng latLng = new LatLng(Double.parseDouble(item.getLat()),
+                                Double.parseDouble(item.getLon()));
+                        values[index - 1] = latLng;
+                        addMarker(index++, latLng, item, (index - 1) == trackingItems.size());
 
+                    }
+                }
+                addPolyline(values);
             }
 
             @Override
             public void onError(Throwable throwable) {
-
+                throwable.printStackTrace();
             }
         });
+
+        getCurrentLocation();
     }
 
-//    public void addMarker(){
-////        Marker marker = new Marker();
-////    }
+    public void addMarker(int tag, LatLng position, PetTrackingItem item, boolean last) {
+        MarkerOptions options = new MarkerOptions()
+                .position(position)
+                .title(tag + ". " + item.getFormattedDate())
+                .visible(true);
+
+        Marker marker = hMap.addMarker(options);
+        if (tag == 1){
+            marker.showInfoWindow();
+            CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLng(position);
+            hMap.animateCamera(cameraUpdate);
+            cameraUpdate = CameraUpdateFactory.zoomBy(5);
+            hMap.animateCamera(cameraUpdate);
+        }
+        if (last){
+            Button button = getView().findViewById(R.id.readTrackbutton);
+            button.setOnClickListener(view -> {
+                if (currentLocation != null){
+                    RouteController.getInstance().getRoute("driving", currentLocation, position, new RouteController.RouteCallback() {
+                        @Override
+                        public void onRouteResult(Routes routes) {
+                            List<Step> steps = routes.getRoutes().get(0).getPaths().get(0).getSteps();
+
+                            for (Step item: steps ){
+                                int index = 0;
+                                LatLng [] lats = new LatLng[item.getPolyline().size()];
+                                for (Position pos: item.getPolyline()){
+                                    lats[index++] = new LatLng(pos.getLat(), pos.getLng());
+                                }
+                                addPolyline(lats);
+                            }
+                        }
+
+                        @Override
+                        public void onError(Throwable throwable) {
+                            Toast.makeText(getContext(),"Error planning route", Toast.LENGTH_LONG).show();
+                        }
+                    });
+                }else{
+                    Toast.makeText(getContext(),"No location yet", Toast.LENGTH_LONG).show();
+                }
+            });
+
+        }
+    }
+
+    public void addPolyline(LatLng[] values) {
+        hMap.addPolyline(new PolylineOptions()
+                .add(values)
+                .color(Color.BLUE)
+                .width(3));
+    }
+
+    public void getCurrentLocation(){
+        LocationManager.getInstance().getLocation(getContext(),
+                latLng -> currentLocation = latLng);
+    }
 
     @Override
     public void onResume() {
@@ -150,26 +231,26 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
         mMapView.onLowMemory();
     }
 
-    private void switchMap2DayTime(){
+    private void switchMap2DayTime() {
         hMap.setStyleId(MyApplication.dayMapStyleID);
         hMap.previewId(MyApplication.dayMapStylePreID);
     }
 
-    private void switchMap2NightTime(){
+    private void switchMap2NightTime() {
         hMap.setStyleId(MyApplication.nightMapStyleID);
         hMap.previewId(MyApplication.nightMapStylePreID);
     }
 
     private void setListener() {
-        SwitchCompat switchCompat = (SwitchCompat)root.findViewById(R.id.switch1);
+        SwitchCompat switchCompat = (SwitchCompat) root.findViewById(R.id.switch1);
         switchCompat.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
                 Log.d(TAG, "onCheckedChanged: " + b);
-                if(b){
+                if (b) {
                     switchCompat.setText("Switch to Day View");
                     switchMap2NightTime();
-                }else{
+                } else {
                     switchCompat.setText("Switch to Night View");
                     switchMap2DayTime();
                 }
@@ -181,9 +262,9 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
     }
 
     //login
-    private void loginUser(){
+    private void loginUser() {
         AGConnectUser user = AGConnectAuth.getInstance().getCurrentUser();
-        if(user != null){
+        if (user != null) {
             setLoginUser();
             Toast.makeText(root.getContext(), "you have already signed in!", Toast.LENGTH_LONG).show();
             Log.i(TAG, "loginUser: you have already signed in!");
@@ -197,9 +278,9 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
         startActivityForResult(accountAuthService.getSignInIntent(), SIGN_CODE);
     }
 
-    private void setLoginUser(){
+    private void setLoginUser() {
         MyApplication myApp = (MyApplication) getActivity().getParent().getApplication();
-        if(myApp.login) {
+        if (myApp.login) {
             NavigationView navigationView = root.findViewById(R.id.nav_view);
             View headerView = navigationView.getHeaderView(0);
             ImageView loginImg = headerView.findViewById(R.id.userImageView);
@@ -211,15 +292,15 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
                 //insert user or update user to cloud db
                 CloudDBOperator.writeUser2DB(myApp.user);
                 Log.d(TAG, "setLoginUser: write user.");
-            },2000);
+            }, 2000);
         }
     }
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if(requestCode == this.SIGN_CODE){
-            Task<AuthAccount> authAccountTask  = AccountAuthManager.parseAuthResultFromIntent(data);
+        if (requestCode == this.SIGN_CODE) {
+            Task<AuthAccount> authAccountTask = AccountAuthManager.parseAuthResultFromIntent(data);
             if (authAccountTask.isSuccessful()) {
                 AuthAccount authAccount = authAccountTask.getResult();
                 Log.i(TAG, "accessToken:" + authAccount.getAccessToken());
@@ -230,7 +311,7 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
                     setLoginUser();
                 }).addOnFailureListener(e -> {
                     // onFail
-                    Log.e(TAG, "onFailure: " + e.getMessage() );
+                    Log.e(TAG, "onFailure: " + e.getMessage());
                 });
             }
         }

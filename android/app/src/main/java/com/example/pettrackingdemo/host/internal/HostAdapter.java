@@ -1,7 +1,5 @@
-package com.example.pettrackingdemo.host;
+package com.example.pettrackingdemo.host.internal;
 
-import com.example.pettrackingdemo.host.response.PetTrackingItem;
-import com.example.pettrackingdemo.host.response.UserInfoResponse;
 import com.google.gson.JsonObject;
 
 import java.util.ArrayList;
@@ -13,15 +11,15 @@ import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
 public class HostAdapter {
-    private static ApiService API_SERVICE;
-    private static final String BASE_URL = "http://192.168.2.90:8080";
+    private ApiService apiService;
+    private static final String BASE_URL = "http://192.168.1.43:8080";
     private Retrofit retrofit;
 
-    public HostAdapter(){
-        this.getApiService();
+    public HostAdapter() {
+        initApiService();
     }
 
-    private ApiService getApiService() {
+    private void initApiService() {
         // Creamos un interceptor y le indicamos el log level a usar
         final HttpLoggingInterceptor logging = new HttpLoggingInterceptor();
         logging.setLevel(HttpLoggingInterceptor.Level.BODY);
@@ -29,29 +27,26 @@ public class HostAdapter {
         // Asociamos el interceptor a las peticiones
         final OkHttpClient.Builder httpClient = new OkHttpClient.Builder();
         httpClient.addInterceptor(logging);
-        if (API_SERVICE == null) {
-            retrofit = new Retrofit.Builder()
-                    .baseUrl(BASE_URL)
-                    .addConverterFactory(GsonConverterFactory.create())
-                    .client(httpClient.build()) // <-- set log level
-                    .build();
 
-            API_SERVICE = retrofit.create(ApiService.class);
-        }
+        retrofit = new Retrofit.Builder()
+                .baseUrl(BASE_URL)
+                .addConverterFactory(GsonConverterFactory.create())
+                .client(httpClient.build()) // <-- set log level
+                .build();
 
-        return API_SERVICE;
+        apiService = retrofit.create(ApiService.class);
     }
 
     public Call<ArrayList<UserInfoResponse>> getUserInfo(String userId) {
         ApiService service = retrofit.create(ApiService.class);
         JsonObject joc = new JsonObject();
-        try{
+        try {
             JsonObject values = new JsonObject();
             values.addProperty("user_id", userId);
             joc.addProperty("action", "GETUSERBYUSERID");
-            joc.add("values",values);
+            joc.add("values", values);
 
-        }catch(Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
         return service.getUserByUserId(joc);
@@ -60,13 +55,13 @@ public class HostAdapter {
     public Call<ArrayList<PetTrackingItem>> getPetTracking(String petId) {
         ApiService service = retrofit.create(ApiService.class);
         JsonObject joc = new JsonObject();
-        try{
+        try {
             JsonObject values = new JsonObject();
             values.addProperty("PetID", petId);
             joc.addProperty("action", "GETPETLOCATIONBYPETID");
-            joc.add("values",values);
+            joc.add("values", values);
 
-        }catch(Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
         return service.getPetTracking(joc);

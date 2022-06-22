@@ -64,8 +64,8 @@ public class MyApplication extends Application {
 
     //initialize cloud DB and login status
     public static void initAppData(Activity activity){
-        initializeLogin(activity);
-        CloudDBOperator.openCloudDBZone(activity);
+//        initializeLogin(activity);
+//        CloudDBOperator.openCloudDBZone(activity);
     }
 
     //if user has login, then set the login details upon app open

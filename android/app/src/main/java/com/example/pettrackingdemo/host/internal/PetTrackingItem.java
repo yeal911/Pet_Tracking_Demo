@@ -1,6 +1,9 @@
-package com.example.pettrackingdemo.host.response;
+package com.example.pettrackingdemo.host.internal;
 
 import com.google.gson.annotations.SerializedName;
+
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 public class PetTrackingItem {
     @SerializedName("RecordID")
@@ -11,7 +14,7 @@ public class PetTrackingItem {
     private String date;
     @SerializedName("Latitude")
     private String lat;
-    @SerializedName("Longitude")
+    @SerializedName("Longtitude")
     private String lon;
     @SerializedName("Remark")
     private String remark;
@@ -62,5 +65,12 @@ public class PetTrackingItem {
 
     public void setRemark(String remark) {
         this.remark = remark;
+    }
+
+    public String getFormattedDate(){
+        String pattern = "yyyy-MM-dd'T'HH:mm:ss";
+        SimpleDateFormat formatter = new SimpleDateFormat(pattern);
+        String dateString = formatter.format(new Date(Long.parseLong(this.date)));
+        return dateString;
     }
 }

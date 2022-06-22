@@ -1,4 +1,4 @@
-package com.example.pettrackingdemo.host;
+package com.example.pettrackingdemo.host.internal;
 
 import com.google.gson.annotations.SerializedName;
 

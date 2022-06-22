@@ -1,7 +1,7 @@
 package com.example.pettrackingdemo.tool;
 
-import com.example.pettrackingdemo.host.HostAdapter;
-import com.example.pettrackingdemo.host.response.PetTrackingItem;
+import com.example.pettrackingdemo.host.internal.HostAdapter;
+import com.example.pettrackingdemo.host.internal.PetTrackingItem;
 
 import java.util.ArrayList;
 

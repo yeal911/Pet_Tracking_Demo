@@ -1,7 +1,5 @@
-package com.example.pettrackingdemo.host;
+package com.example.pettrackingdemo.host.internal;
 
-import com.example.pettrackingdemo.host.response.PetTrackingItem;
-import com.example.pettrackingdemo.host.response.UserInfoResponse;
 import com.google.gson.JsonObject;
 
 import java.util.ArrayList;
