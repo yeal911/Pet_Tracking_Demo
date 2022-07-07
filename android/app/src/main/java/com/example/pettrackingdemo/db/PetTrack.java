@@ -4,24 +4,15 @@
  */
 package com.example.pettrackingdemo.db;
 
-import com.huawei.agconnect.cloud.database.CloudDBZoneObject;
-import com.huawei.agconnect.cloud.database.Text;
-import com.huawei.agconnect.cloud.database.annotations.DefaultValue;
-import com.huawei.agconnect.cloud.database.annotations.EntireEncrypted;
-import com.huawei.agconnect.cloud.database.annotations.NotNull;
-import com.huawei.agconnect.cloud.database.annotations.Indexes;
-import com.huawei.agconnect.cloud.database.annotations.PrimaryKeys;
 
-import java.util.Date;
 
 /**
  * Definition of ObjectType PetTrack.
  *
  * @since 2022-04-20
  */
-@PrimaryKeys({"RecordID"})
-@Indexes({"idx_petid:PetID,Date", "idx_id:RecordID"})
-public final class PetTrack extends CloudDBZoneObject {
+
+public final class PetTrack {
     private String RecordID;
 
     private String PetID;
@@ -36,9 +27,7 @@ public final class PetTrack extends CloudDBZoneObject {
 
     private String Remark;
 
-    public PetTrack() {
-        super(PetTrack.class);
-    }
+
 
     public void setRecordID(String RecordID) {
         this.RecordID = RecordID;

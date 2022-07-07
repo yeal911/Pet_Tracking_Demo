@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <TextView android:id="@+id/id_pet_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="30sp"
+            android:layout_centerHorizontal="true"
+            android:layout_marginTop="10dp"/>
+
+
+        <ListView
+            android:id="@+id/id_pet_locations"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_below="@id/id_pet_name"/>
+
+        <Button android:id="@+id/id_button_delete"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:backgroundTint="@color/hwid_auth_button_color_red"
+            android:text="Delete"
+            android:layout_alignParentBottom="true"/>
+
+        <Button android:id="@+id/id_add_random_location"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Add location"
+            android:layout_above="@id/id_button_delete"/>
+
+        <Button android:id="@+id/id_clear_all_locations"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Clear locations"
+            android:backgroundTint="@color/black"
+            android:layout_above="@id/id_add_random_location"/>
+
+    </RelativeLayout>
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>

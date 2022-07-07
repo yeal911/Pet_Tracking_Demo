@@ -2,5 +2,10 @@
     <string name="app_name">Pet Tracking Demo</string>
     <string name="title_home">Home</string>
     <string name="title_dashboard">Dashboard</string>
-    <string name="title_notifications">Notifications</string>
+    <string name="title_login">User</string>
+    <string name="title_sign_up">Register</string>
+    <string name="title_user_info">User Profile</string>
+    <string name="title_manage_pet">Manage Pets</string>
+    <string name="title_register_pet">Register Pet</string>
+    <string name="title_pet_details">Pet Details </string>
 </resources>

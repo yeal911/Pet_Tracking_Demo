@@ -16,6 +16,14 @@ class Database {
     return null;
   }
 
+  async deleteItem(item) {
+    try {
+      const resp = await mCloudDBZone.executeDelete(item);
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
   createQuery(objType, expressions) {
     let query = clouddb.CloudDBZoneQuery.where(objType);
     if (expressions) {
@@ -56,7 +64,7 @@ async function initCloudDB() {
 
   const cloudDBZoneConfig = new clouddb.CloudDBZoneConfig(dbZone);
   const zone = agconnectCloudDB.openCloudDBZone(cloudDBZoneConfig);
-  mCloudDBZone = zone; 
+  mCloudDBZone = zone;
 }
 
 module.exports = { Database, initCloudDB, mCloudDBZone };

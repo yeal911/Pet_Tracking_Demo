@@ -5,12 +5,15 @@
   "main": "src/index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "nodemon src/server.js"
+    "upload": "agcli func create-function --name petracking' --code-path functions.zip",
+    "deploy": "zip -r functions.zip ./ && npm run upload",
+    "local": "nodemon src/server.js"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
     "@agconnect/agc-cli": "^1.1.0",
+    "@agconnect/auth-server": "^1.2.0",
     "@agconnect/common-server": "^1.2.0",
     "@agconnect/database-server": "^1.0.5",
     "@agconnect/function-server": "^1.0.0",

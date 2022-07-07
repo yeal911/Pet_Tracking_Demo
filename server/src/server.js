@@ -7,6 +7,7 @@ const pet_mng = require("./managers/pet_manager");
 const user_mng = require("./managers/user_manager");
 const config = require("dotenv").config();
 const database = require("./utils/clouddb");
+const { AGCAuth } = require("@agconnect/auth-server");
 
 const app = express();
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -41,17 +42,27 @@ async function petCtr(body) {
     case "PUTBULKPETLOCATION": {
       return await pet_mng.putBulkPetLocation(body.values);
     }
-    
+    case "DELETEPETBYPETID": {
+      return await pet_mng.deletePetByPetId(body.values);
+    }
+    case "CLEARALLPETLOCATIONSBYPETID": {
+      return await pet_mng.deleteAllPetLocationsByPetId(body.values);
+    }
   }
 }
 
-async function userCtr(body){
+async function userCtr(body) {
   switch (body.action) {
     case "GETUSERBYUSERID": {
       return await user_mng.getUserByUserId(body.values.user_id);
     }
+    case "PUTUSERINFO": {
+      return await user_mng.putUser(body.values);
+    }
+    default: {
+      throw new Error("Operation not supported");
+    }
   }
-
 }
 
 app.post("/pets", (req, res) => {
@@ -69,21 +80,24 @@ app.post("/pets", (req, res) => {
     });
 });
 
-app.post("/users", (req, res)=>{
+app.post("/users", (req, res) => {
   const body = req.body;
   userCtr(body)
-  .then((value) => {
-    console.log(JSON.stringify(value));
-    res.status(200).send(value);
-  })
-  .catch((error) => {
-    res.status(500).send(error);
-  });
+    .then((value) => {
+      console.log(JSON.stringify(value));
+      res.status(200).send(value);
+    })
+    .catch((error) => {
+      res.status(500).send(error);
+    });
 });
+
+function getAccessToken() {
+  agc;
+}
 
 app.listen(port, () => {
   database.initCloudDB().then(() => {
     console.log(`PetTracking ${port}`);
   });
-  
 });

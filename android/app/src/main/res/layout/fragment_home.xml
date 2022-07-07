@@ -1,55 +1,43 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".ui.home.HomeFragment">
 
-    <ImageView
-        android:id="@+id/userImageView"
-        android:layout_width="50dp"
-        android:layout_height="50dp"
-        app:layout_constraintBottom_toTopOf="@+id/huaweiMap"
-        app:layout_constraintEnd_toStartOf="@+id/readTrackbutton"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:srcCompat="@drawable/header"
-        />
-
-    <Button
-        android:id="@+id/readTrackbutton"
-        android:layout_width="wrap_content"
+    <LinearLayout android:id="@+id/id_options"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Route"
-        app:layout_constraintEnd_toStartOf="@+id/switch1"
-        app:layout_constraintStart_toEndOf="@+id/userImageView"
-        app:layout_constraintBottom_toTopOf="@+id/huaweiMap"
-        app:layout_constraintTop_toTopOf="parent" />
+        android:orientation="horizontal"
+        android:layout_marginTop="20dp">
+        <Spinner android:id="@+id/id_pet_selection"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintBottom_toTopOf="@+id/huaweiMap"
+            app:layout_constraintTop_toTopOf="parent"
+            android:layout_marginTop="10dp"/>
 
-    <androidx.appcompat.widget.SwitchCompat
-        android:id="@+id/switch1"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Switch to Night View"
-        app:layout_constraintBottom_toTopOf="@+id/huaweiMap"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/readTrackbutton"
-        app:layout_constraintTop_toTopOf="parent" />
+        <Button
+            android:id="@+id/readTrackbutton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Route"
+            />
+    </LinearLayout>
+
+
 
     <com.huawei.hms.maps.MapView
         android:id="@+id/huaweiMap"
         android:layout_width="match_parent"
-        android:layout_height="0dp"
+        android:layout_height="match_parent"
         app:cameraTargetLat="40.50829"
         app:cameraTargetLng="-3.67811"
         app:cameraZoom="13"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/switch1"
+        android:layout_below="@+id/id_options"
         app:uiCompass="true"
         tools:ignore="SpeakableTextPresentCheck"/>
 
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+</RelativeLayout>

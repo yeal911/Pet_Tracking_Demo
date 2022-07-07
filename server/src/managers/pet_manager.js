@@ -26,13 +26,13 @@ async function getPetByPetId(petId) {
 
 async function putPet(params) {
   console.log("putPet:" + JSON.stringify(params));
-  const users = await user_mng.getUserByUserId(params.Ownership);
+  const users = await user_mng.getUserByUserId(params.user_id);
   if (users.length > 0) {
     const pet = new PetInfo.Pet();
     pet.setPetID(uuidv4());
-    pet.setPetName(params.PetName);
-    pet.setOwnership(params.Ownership);
-    pet.setPetDesc(params.PetDesc);
+    pet.setPetName(params.pet_name);
+    pet.setOwnership(params.user_id);
+    pet.setPetDesc(params.pet_type);
 
     let database = new CloudDb.Database();
     await database.putItem(pet);
@@ -47,14 +47,14 @@ async function putPet(params) {
 
 async function putPetLocation(params) {
   console.log("putPetLocation: " + JSON.stringify(params));
-  const pets = await getPetByPetId(params.PetID);
+  const pets = await getPetByPetId(params.pet_id);
   if (pets.length > 0) {
     const petTrack = new PetTraking.PetTrack();
     petTrack.setRecordID(uuidv4());
-    petTrack.setPetID(params.PetID);
+    petTrack.setPetID(params.pet_id);
     petTrack.setDate(Date.now().toString());
-    petTrack.setLatitude(params.Lat);
-    petTrack.setLongtitude(params.Lng);
+    petTrack.setLatitude(params.lat);
+    petTrack.setLongtitude(params.lon);
     petTrack.setRemark("");
 
     let database = new CloudDb.Database();
@@ -70,11 +70,11 @@ async function putPetLocation(params) {
 
 async function getPetLocationByPetId(params) {
   console.log("getPetLocationByPetId: " + JSON.stringify(params));
-  const pets = await getPetByPetId(params.PetID);
+  const pets = await getPetByPetId(params.pet_id);
   if (pets.length > 0) {
     let database = new CloudDb.Database();
     const query = database.createQuery(PetTraking.PetTrack, [
-      { filter: "eq", field_name: "PetID", field_value: params.PetID },
+      { filter: "eq", field_name: "PetID", field_value: params.pet_id },
     ]);
     query.orderByAsc("Date");
     const items = database.readItems(query);
@@ -100,10 +100,33 @@ async function putBulkPetLocation(params) {
   return result;
 }
 
+async function deletePetByPetId(params) {
+  console.log("deletePetByPetId: " + JSON.stringify(params));
+  let database = new CloudDb.Database();
+  const pet = new PetInfo.Pet();
+  pet.setPetID(params.pet_id);
+  await database.deleteItem(pet)
+}
+
+async function deleteAllPetLocationsByPetId(params){
+  console.log("deleteAllPetLocationsByPetId: " + JSON.stringify(params));
+  let database = new CloudDb.Database();
+  const locations = await getPetLocationByPetId(params);
+  for (let loc of locations){
+    console.log("joc: "+JSON.stringify(loc));
+    const tracking = new PetTraking.PetTrack(); 
+    tracking.setRecordID(loc.RecordID);
+    await database.deleteItem(tracking);
+  }  
+}
+
+
 module.exports = {
   getPetsByUserId,
   putPet,
   putPetLocation,
   getPetLocationByPetId,
   putBulkPetLocation,
+  deletePetByPetId,
+  deleteAllPetLocationsByPetId
 };

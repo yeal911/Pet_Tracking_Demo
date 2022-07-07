@@ -18,8 +18,48 @@
         tools:layout="@layout/fragment_dashboard" />
 
     <fragment
-        android:id="@+id/navigation_notifications"
-        android:name="com.example.pettrackingdemo.ui.notifications.NotificationsFragment"
-        android:label="@string/title_notifications"
-        tools:layout="@layout/fragment_notifications" />
+        android:id="@+id/navigation_user_login"
+        android:name="com.example.pettrackingdemo.ui.auth.UserLoginFragment"
+        android:label="@string/title_login"
+        tools:layout="@layout/fragment_login">
+    </fragment>
+
+    <fragment
+        android:id="@+id/navigation_user_register"
+        android:name="com.example.pettrackingdemo.ui.auth.UserRegisterFragment"
+        android:label="@string/title_sign_up"
+        tools:layout="@layout/fragment_register" >
+        <action
+            android:id="@+id/action_navigation_user_register_to_navigation_user_login"
+            app:destination="@id/navigation_user_login"
+            app:popUpTo="@id/navigation_user_register" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/navigation_user_info"
+        android:name="com.example.pettrackingdemo.ui.auth.UserInfoFragment"
+        android:label="@string/title_user_info"
+        tools:layout="@layout/fragment_user_info">
+    </fragment>
+
+    <fragment
+        android:id="@+id/navigation_list_pet"
+        android:name="com.example.pettrackingdemo.ui.pet.ListPetFragment"
+        android:label="@string/title_manage_pet"
+        tools:layout="@layout/fragment_list_pet">
+    </fragment>
+
+    <fragment
+        android:id="@+id/navigation_pet_details"
+        android:name="com.example.pettrackingdemo.ui.pet.PetDetailsFragment"
+        android:label="@string/title_pet_details"
+        tools:layout="@layout/fragment_pet_details">
+    </fragment>
+
+    <fragment
+        android:id="@+id/navigation_pet_register"
+        android:name="com.example.pettrackingdemo.ui.pet.RegisterPetFragment"
+        android:label="@string/title_register_pet"
+        tools:layout="@layout/fragment_pet_register">
+    </fragment>
 </navigation>

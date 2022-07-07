@@ -43,6 +43,7 @@ android {
     }
     buildFeatures {
         viewBinding true
+        dataBinding true
     }
 }
 
@@ -66,23 +67,19 @@ dependencies {
     implementation 'com.github.bumptech.glide:glide:4.12.0'
     annotationProcessor 'com.github.bumptech.glide:compiler:4.12.0'
 
-    // 添加Cloud DB SDK
-    implementation 'com.huawei.agconnect:agconnect-cloud-database:1.5.2.300'
-
     implementation 'com.huawei.agconnect:agconnect-crash:1.6.0.300'
     implementation 'com.huawei.agconnect:agconnect-apms:1.5.2.305'
-    implementation 'com.huawei.hms:hianalytics:5.3.0.300'
+    implementation 'com.huawei.hms:hianalytics:6.5.0.300'
 
     implementation "com.huawei.agconnect:agconnect-auth:1.6.0.300"
     implementation 'com.huawei.hms:hwid:6.1.0.300'
-
-//    implementation "com.squareup.okhttp3:okhttp:4.9.0"
-//    implementation "com.alibaba:fastjson:1.2.73"
 
     implementation 'com.squareup.retrofit2:retrofit:2.9.0'
     implementation 'com.squareup.retrofit2:converter-gson:2.6.4'
     implementation 'com.squareup.okhttp3:logging-interceptor:4.9.3'
     implementation 'com.huawei.hms:location:6.4.0.300'
+    implementation 'com.huawei.agconnect:agconnect-function:1.7.0.300'
+    implementation "com.huawei.agconnect:agconnect-auth:1.7.0.300"
 }
 
 apply plugin: 'com.huawei.agconnect'

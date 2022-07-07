@@ -1,45 +1,34 @@
 package com.example.pettrackingdemo.ui.home;
 
 import android.Manifest;
-import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
-import android.os.Handler;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.CompoundButton;
-import android.widget.ImageView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.appcompat.widget.SwitchCompat;
 import androidx.fragment.app.Fragment;
-import androidx.lifecycle.ViewModelProvider;
 
-import com.bumptech.glide.Glide;
 import com.example.pettrackingdemo.databinding.FragmentHomeBinding;
-import com.example.pettrackingdemo.db.CloudDBOperator;
+import com.example.pettrackingdemo.db.Pet;
+import com.example.pettrackingdemo.hms.auth.AuthController;
+import com.example.pettrackingdemo.hms.auth.User;
 import com.example.pettrackingdemo.host.internal.PetTrackingItem;
 import com.example.pettrackingdemo.host.internal.Position;
-import com.example.pettrackingdemo.host.internal.Route;
-import com.example.pettrackingdemo.host.internal.RouteHostAdapter;
-import com.example.pettrackingdemo.host.internal.RouteService;
 import com.example.pettrackingdemo.host.internal.Routes;
 import com.example.pettrackingdemo.host.internal.Step;
 import com.example.pettrackingdemo.tool.LocationManager;
 import com.example.pettrackingdemo.tool.MyApplication;
 import com.example.pettrackingdemo.tool.PetTrackingController;
 import com.example.pettrackingdemo.tool.RouteController;
-import com.google.android.material.navigation.NavigationView;
-import com.huawei.agconnect.auth.AGConnectAuth;
-import com.huawei.agconnect.auth.AGConnectAuthCredential;
-import com.huawei.agconnect.auth.AGConnectUser;
-import com.huawei.agconnect.auth.HwIdAuthProvider;
-import com.huawei.hmf.tasks.Task;
+import com.example.pettrackingdemo.tool.UserController;
 import com.huawei.hms.maps.CameraUpdate;
 import com.huawei.hms.maps.CameraUpdateFactory;
 import com.huawei.hms.maps.HuaweiMap;
@@ -51,11 +40,6 @@ import com.huawei.hms.maps.model.LatLng;
 import com.huawei.hms.maps.model.Marker;
 import com.huawei.hms.maps.model.MarkerOptions;
 import com.huawei.hms.maps.model.PolylineOptions;
-import com.huawei.hms.support.account.AccountAuthManager;
-import com.huawei.hms.support.account.request.AccountAuthParams;
-import com.huawei.hms.support.account.request.AccountAuthParamsHelper;
-import com.huawei.hms.support.account.result.AuthAccount;
-import com.huawei.hms.support.account.service.AccountAuthService;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -67,20 +51,14 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
     private HuaweiMap hMap;
     private MapView mMapView;
     private View root;
-
-    private final int SIGN_CODE = 100;
-    private  LatLng currentLocation;
+    private LatLng currentLocation;
+    ArrayList<Pet> pets = new ArrayList<>();
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
-        HomeViewModel homeViewModel =
-                new ViewModelProvider(this).get(HomeViewModel.class);
 
         binding = FragmentHomeBinding.inflate(inflater, container, false);
         root = binding.getRoot();
-
-//        final TextView textView = binding.textHome;
-//        homeViewModel.getText().observe(getViewLifecycleOwner(), textView::setText);
 
         mMapView = root.findViewById(R.id.huaweiMap);
         Bundle mapViewBundle = null;
@@ -89,13 +67,28 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
         }
         mMapView.onCreate(mapViewBundle);
         mMapView.getMapAsync(this);
-
-        //initialize DB and user login
         MyApplication.initAppData(getActivity().getParent());
-
-        setListener();
-
         return root;
+    }
+
+    @Override
+    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
+        super.onViewCreated(view, savedInstanceState);
+        pets.clear();
+        loadPetsForUser();
+        binding.idPetSelection.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+                getPetTracking(pets.get(i));
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> adapterView) {
+
+            }
+        });
+
+
     }
 
     @Override
@@ -117,29 +110,6 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
         hMap.getUiSettings().setMyLocationButtonEnabled(true);
         hMap.setLanguage("en");
 
-        PetTrackingController.getInstance().getTracking(new PetTrackingController.PetTrackingCallback() {
-            @Override
-            public void onPetTrackingResponse(ArrayList<PetTrackingItem> trackingItems) {
-                int index = 1;
-                LatLng[] values = new LatLng[trackingItems.size()];
-                for (PetTrackingItem item : trackingItems) {
-                    if (item.getLat() != null && item.getLon() != null) {
-                        LatLng latLng = new LatLng(Double.parseDouble(item.getLat()),
-                                Double.parseDouble(item.getLon()));
-                        values[index - 1] = latLng;
-                        addMarker(index++, latLng, item, (index - 1) == trackingItems.size());
-
-                    }
-                }
-                addPolyline(values);
-            }
-
-            @Override
-            public void onError(Throwable throwable) {
-                throwable.printStackTrace();
-            }
-        });
-
         getCurrentLocation();
     }
 
@@ -150,26 +120,26 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
                 .visible(true);
 
         Marker marker = hMap.addMarker(options);
-        if (tag == 1){
+        if (tag == 1) {
             marker.showInfoWindow();
             CameraUpdate cameraUpdate = CameraUpdateFactory.newLatLng(position);
             hMap.animateCamera(cameraUpdate);
-            cameraUpdate = CameraUpdateFactory.zoomBy(5);
+//            cameraUpdate = CameraUpdateFactory.zoomBy(5);
             hMap.animateCamera(cameraUpdate);
         }
-        if (last){
+        if (last) {
             Button button = getView().findViewById(R.id.readTrackbutton);
             button.setOnClickListener(view -> {
-                if (currentLocation != null){
+                if (currentLocation != null) {
                     RouteController.getInstance().getRoute("driving", currentLocation, position, new RouteController.RouteCallback() {
                         @Override
                         public void onRouteResult(Routes routes) {
                             List<Step> steps = routes.getRoutes().get(0).getPaths().get(0).getSteps();
 
-                            for (Step item: steps ){
+                            for (Step item : steps) {
                                 int index = 0;
-                                LatLng [] lats = new LatLng[item.getPolyline().size()];
-                                for (Position pos: item.getPolyline()){
+                                LatLng[] lats = new LatLng[item.getPolyline().size()];
+                                for (Position pos : item.getPolyline()) {
                                     lats[index++] = new LatLng(pos.getLat(), pos.getLng());
                                 }
                                 addPolyline(lats);
@@ -178,11 +148,11 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
 
                         @Override
                         public void onError(Throwable throwable) {
-                            Toast.makeText(getContext(),"Error planning route", Toast.LENGTH_LONG).show();
+                            Toast.makeText(getContext(), "Error planning route", Toast.LENGTH_LONG).show();
                         }
                     });
-                }else{
-                    Toast.makeText(getContext(),"No location yet", Toast.LENGTH_LONG).show();
+                } else {
+                    Toast.makeText(getContext(), "No location yet", Toast.LENGTH_LONG).show();
                 }
             });
 
@@ -196,7 +166,7 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
                 .width(3));
     }
 
-    public void getCurrentLocation(){
+    public void getCurrentLocation() {
         LocationManager.getInstance().getLocation(getContext(),
                 latLng -> currentLocation = latLng);
     }
@@ -241,79 +211,65 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
         hMap.previewId(MyApplication.nightMapStylePreID);
     }
 
-    private void setListener() {
-        SwitchCompat switchCompat = (SwitchCompat) root.findViewById(R.id.switch1);
-        switchCompat.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton compoundButton, boolean b) {
-                Log.d(TAG, "onCheckedChanged: " + b);
-                if (b) {
-                    switchCompat.setText("Switch to Day View");
-                    switchMap2NightTime();
-                } else {
-                    switchCompat.setText("Switch to Night View");
-                    switchMap2DayTime();
+
+    private void loadPetsForUser() {
+        User user = AuthController.getInstance().getUser();
+        ArrayList<String> items = new ArrayList<>();
+        if (user != null && user.getUid() != null) {
+            UserController.getInstance().getPetsForUserId(user.getUid(), new UserController.GetPetsCallback() {
+                @Override
+                public void onSuccess(ArrayList<Pet> values) {
+                    pets = values;
+                    ArrayAdapter<String> adapter = new ArrayAdapter<>(getContext(),
+                            android.R.layout.simple_list_item_1, items);
+                    for (Pet item : values) {
+                        items.add(item.getPetName());
+                    }
+                    binding.idPetSelection.setAdapter(adapter);
                 }
+
+                @Override
+                public void onError(Throwable throwable) {
+                    Toast.makeText(getContext(),
+                            throwable.getLocalizedMessage(), Toast.LENGTH_LONG).show();
+                }
+            });
+        }
+    }
+
+    private void getPetTracking(Pet pet) {
+        PetTrackingController.getInstance().getTracking(pet.getPetID(), new PetTrackingController.PetTrackingCallback() {
+            @Override
+            public void onPetTrackingResponse(ArrayList<PetTrackingItem> trackingItems) {
+                managePetTracking(trackingItems);
+            }
+
+            @Override
+            public void onError(Throwable throwable) {
+                Toast.makeText(getContext(), throwable.getLocalizedMessage(), Toast.LENGTH_LONG).show();
             }
         });
-
-        ImageView loginImg = root.findViewById(R.id.userImageView);
-        loginImg.setOnClickListener(v -> loginUser());
     }
 
-    //login
-    private void loginUser() {
-        AGConnectUser user = AGConnectAuth.getInstance().getCurrentUser();
-        if (user != null) {
-            setLoginUser();
-            Toast.makeText(root.getContext(), "you have already signed in!", Toast.LENGTH_LONG).show();
-            Log.i(TAG, "loginUser: you have already signed in!");
-            return;
-        }
-        AccountAuthParams authParams = new AccountAuthParamsHelper(AccountAuthParams.DEFAULT_AUTH_REQUEST_PARAM)
-                .setAccessToken()
-                .createParams();
-        AccountAuthService accountAuthService = AccountAuthManager.getService(this.getContext(), authParams);
-        //在需要的时候开启登录流程，比如你可以创建一个按钮，按钮的点击事件中调用下面的方法
-        startActivityForResult(accountAuthService.getSignInIntent(), SIGN_CODE);
-    }
+    private void managePetTracking(ArrayList<PetTrackingItem> trackingItems) {
+        int index = 1;
+        try {
+            hMap.clear();
 
-    private void setLoginUser() {
-        MyApplication myApp = (MyApplication) getActivity().getParent().getApplication();
-        if (myApp.login) {
-            NavigationView navigationView = root.findViewById(R.id.nav_view);
-            View headerView = navigationView.getHeaderView(0);
-            ImageView loginImg = headerView.findViewById(R.id.userImageView);
-            Glide.with(this).load(myApp.user.getPhotoUrl().toString()).into(loginImg);
-
-            //因为CLOUD DB的bug（数据库实际未完成打开动作，但是已返回成功），导致不得不延时执行写入操作
-            new Handler().postDelayed(() -> {
-                //execute the task
-                //insert user or update user to cloud db
-                CloudDBOperator.writeUser2DB(myApp.user);
-                Log.d(TAG, "setLoginUser: write user.");
-            }, 2000);
-        }
-    }
-
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == this.SIGN_CODE) {
-            Task<AuthAccount> authAccountTask = AccountAuthManager.parseAuthResultFromIntent(data);
-            if (authAccountTask.isSuccessful()) {
-                AuthAccount authAccount = authAccountTask.getResult();
-                Log.i(TAG, "accessToken:" + authAccount.getAccessToken());
-                AGConnectAuthCredential credential = HwIdAuthProvider.credentialWithToken(authAccount.getAccessToken());
-                AGConnectAuth.getInstance().signIn(credential).addOnSuccessListener(signInResult -> {
-                    // onSuccess
-                    MyApplication.initAppData(getActivity());
-                    setLoginUser();
-                }).addOnFailureListener(e -> {
-                    // onFail
-                    Log.e(TAG, "onFailure: " + e.getMessage());
-                });
+            LatLng[] values = new LatLng[trackingItems.size()];
+            for (PetTrackingItem item : trackingItems) {
+                if (item.getLat() != null && item.getLon() != null) {
+                    LatLng latLng = new LatLng(Double.parseDouble(item.getLat()),
+                            Double.parseDouble(item.getLon()));
+                    values[index - 1] = latLng;
+                    addMarker(index++, latLng, item, (index - 1) == trackingItems.size());
+                }
             }
+            addPolyline(values);
+        } catch (Exception e) {
+            e.printStackTrace();
+            Toast.makeText(getContext(), "No values to display", Toast.LENGTH_LONG).show();
         }
     }
+
 }

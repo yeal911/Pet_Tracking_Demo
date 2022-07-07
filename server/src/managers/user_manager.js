@@ -14,10 +14,18 @@ async function getUserByUserId(userId) {
 
 async function putUser(params){
     console.log("putUser: "+JSON.stringify(params));
-
+  
+    const database = new CloudDb.Database();
+    let user = new UserModel.User(); 
+    user.setUserID(params.uid);
+    user.setCreated_at(Date.now());
+    user.setUserName(params.email);
+    await database.putItem(user);
+    return user; 
 
 }
 
 module.exports = {
-    getUserByUserId
+    getUserByUserId,
+    putUser
 };

@@ -12,16 +12,24 @@ import retrofit2.Response;
 public class PetTrackingController {
     private static PetTrackingController instance;
 
-    public interface PetTrackingCallback{
+    public interface PetTrackingCallback {
         void onPetTrackingResponse(ArrayList<PetTrackingItem> trackingItems);
-        void onError (Throwable throwable);
+
+        void onError(Throwable throwable);
     }
 
-    public  void getTracking(PetTrackingCallback callback){
+    public interface PetPutLocationCallback {
+        void onSuccess();
+
+        void onError(Throwable throwable);
+    }
+
+    public void getTracking(String petId, PetTrackingCallback callback) {
         HostAdapter client = new HostAdapter();
-        client.getPetTracking("5906742c-7cb8-4b47-9804-f4788d94d89c").enqueue(new Callback<ArrayList<PetTrackingItem>>() {
+        client.getPetTracking(petId).enqueue(new Callback<ArrayList<PetTrackingItem>>() {
             @Override
-            public void onResponse(Call<ArrayList<PetTrackingItem>> call, Response<ArrayList<PetTrackingItem>> response) {
+            public void onResponse(Call<ArrayList<PetTrackingItem>> call,
+                                   Response<ArrayList<PetTrackingItem>> response) {
                 callback.onPetTrackingResponse(response.body());
             }
 
@@ -32,10 +40,28 @@ public class PetTrackingController {
         });
     }
 
-    public static PetTrackingController getInstance(){
-        if (instance == null){
+    public void putPetLocation(String petId, String lat, String lon, PetPutLocationCallback callback) {
+        HostAdapter client = new HostAdapter();
+        client.putPetLocation(petId, lat, lon).enqueue(new Callback<Void>() {
+            @Override
+            public void onResponse(Call<Void> call, Response<Void> response) {
+                callback.onSuccess();
+            }
+
+            @Override
+            public void onFailure(Call<Void> call, Throwable t) {
+                callback.onError(t);
+            }
+        });
+    }
+
+
+    public static PetTrackingController getInstance() {
+        if (instance == null) {
             instance = new PetTrackingController();
         }
         return instance;
     }
+
+
 }

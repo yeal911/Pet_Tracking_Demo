@@ -4,13 +4,8 @@
  */
 package com.example.pettrackingdemo.db;
 
-import com.huawei.agconnect.cloud.database.CloudDBZoneObject;
-import com.huawei.agconnect.cloud.database.Text;
-import com.huawei.agconnect.cloud.database.annotations.DefaultValue;
-import com.huawei.agconnect.cloud.database.annotations.EntireEncrypted;
-import com.huawei.agconnect.cloud.database.annotations.NotNull;
-import com.huawei.agconnect.cloud.database.annotations.Indexes;
-import com.huawei.agconnect.cloud.database.annotations.PrimaryKeys;
+
+import org.w3c.dom.Text;
 
 import java.util.Date;
 
@@ -19,26 +14,22 @@ import java.util.Date;
  *
  * @since 2022-04-20
  */
-@PrimaryKeys({"userID"})
-@Indexes({"idx_userid:userID"})
-public final class User extends CloudDBZoneObject {
+public final class User  {
     private String userID;
 
     private Date addDate;
 
     private Date lastLoginDate;
 
-    private Text remark;
+    private String remark;
 
     private String userName;
 
     private String userType;
 
-    private Text photoUrl;
+    private String photoUrl;
 
-    public User() {
-        super(User.class);
-    }
+
 
     public void setUserID(String userID) {
         this.userID = userID;
@@ -64,13 +55,6 @@ public final class User extends CloudDBZoneObject {
         return lastLoginDate;
     }
 
-    public void setRemark(Text remark) {
-        this.remark = remark;
-    }
-
-    public Text getRemark() {
-        return remark;
-    }
 
     public void setUserName(String userName) {
         this.userName = userName;
@@ -88,12 +72,19 @@ public final class User extends CloudDBZoneObject {
         return userType;
     }
 
-    public void setPhotoUrl(Text photoUrl) {
-        this.photoUrl = photoUrl;
+    public String getRemark() {
+        return remark;
     }
 
-    public Text getPhotoUrl() {
+    public void setRemark(String remark) {
+        this.remark = remark;
+    }
+
+    public String getPhotoUrl() {
         return photoUrl;
     }
 
+    public void setPhotoUrl(String photoUrl) {
+        this.photoUrl = photoUrl;
+    }
 }

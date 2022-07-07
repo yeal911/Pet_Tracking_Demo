@@ -1,5 +1,6 @@
 package com.example.pettrackingdemo.host.internal;
 
+import com.example.pettrackingdemo.db.Pet;
 import com.google.gson.JsonObject;
 
 import java.util.ArrayList;
@@ -18,7 +19,26 @@ public interface ApiService {
     @POST("/users")
     Call<ArrayList<UserInfoResponse>> getUserByUserId(@Body JsonObject body);
 
+    @POST("/users")
+    Call<Void> putUserInfo(@Body JsonObject body);
+
     @POST("/pets")
     Call<ArrayList<PetTrackingItem>> getPetTracking(@Body JsonObject body);
+
+    @POST("/pets")
+    Call<Void> putPet(@Body JsonObject body);
+
+    @POST("/pets")
+    Call<ArrayList<Pet>> getPetForUserId(@Body JsonObject body);
+
+    @POST("/pets")
+    Call<Void> putPetLocation(@Body JsonObject body);
+
+    @POST("/pets")
+    Call<Void> deletePetByPetId(@Body JsonObject body);
+
+    @POST("/pets")
+    Call<Void> clearAllLocationsByPetId(@Body JsonObject body);
+
 
 }

@@ -18,9 +18,15 @@ public class LocationManager {
         FusedLocationProviderClient fusedLocationProviderClient =
                 LocationServices.getFusedLocationProviderClient(context);
         Task<Location> task = fusedLocationProviderClient.getLastLocation();
-        task.addOnSuccessListener(location ->
+
+        task.addOnSuccessListener(location -> {
+            try {
                 callback.onLocationResult(new LatLng(location.getLatitude(),
-                        location.getLongitude())));
+                        location.getLongitude()));
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        });
         task.addOnFailureListener(e -> e.printStackTrace());
     }
 

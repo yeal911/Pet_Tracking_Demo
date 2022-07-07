@@ -4,11 +4,10 @@ import android.app.Activity;
 import android.app.Application;
 import android.util.Log;
 
-import com.example.pettrackingdemo.db.CloudDBOperator;
 import com.example.pettrackingdemo.db.User;
+import com.huawei.agconnect.AGConnectInstance;
 import com.huawei.agconnect.auth.AGConnectAuth;
 import com.huawei.agconnect.auth.AGConnectUser;
-import com.huawei.agconnect.cloud.database.Text;
 
 import java.util.Date;
 import java.util.List;
@@ -41,24 +40,15 @@ public class MyApplication extends Application {
 
     @Override
     public void onCreate() {
-    // TODO Auto-generated method stub
         super.onCreate();
         me = this;
-//        this.user = new User();
-//        this.login = false;
-//        //set default setting
-//        this.Useretting = new Useretting();
-//        // set selected date to today
-//        this.selectedDate = new SimpleDateFormat("yyyyMMdd").format(new Date());
-//        //initiation
-//        MyApplication.subject = new ArrayList<>();
-//        MyApplication.subjectLevel = new HashMap<>();
-//
-//        //initialize third party static keys
-//        MyApplication.baiduAppID = getString(R.string.baiduAppID);
-//        MyApplication.baiduPrivateKey = getString(R.string.baiduPrivateKey);
-//        MyApplication.huaweiMLApiKey = getString(R.string.huaweiMLApiKey);
-//        MyApplication.xunfeiAppID = getString(R.string.xunfeiAppID);
+
+
+        //init auth service
+        if (AGConnectInstance.getInstance() == null) {
+            AGConnectInstance.initialize(getApplicationContext());
+        }
+
 
     }
 
@@ -76,7 +66,7 @@ public class MyApplication extends Application {
             myApp.login = true;
             myApp.user.setUserID(user.getUid());
             myApp.user.setUserName(user.getDisplayName());
-            myApp.user.setPhotoUrl(new Text(user.getPhotoUrl()));
+            myApp.user.setPhotoUrl(user.getPhotoUrl());
             myApp.user.setLastLoginDate(new Date());
             myApp.user.setUserType("Huawei");
         }
