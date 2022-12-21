@@ -14,8 +14,8 @@ import retrofit2.http.Body;
 
 public class HostAdapter {
     private ApiService apiService;
-    private static final String BASE_URL = "http://192.168.1.41:8080";
-//    private static final String BASE_URL = "http://161.35.88.213";
+//    private static final String BASE_URL = "http://192.168.1.41:8080";
+    private static final String BASE_URL = "http://172.20.10.12:8080";
     private Retrofit retrofit;
 
     public HostAdapter() {

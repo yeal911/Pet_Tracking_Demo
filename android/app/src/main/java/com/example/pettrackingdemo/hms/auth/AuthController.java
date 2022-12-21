@@ -102,16 +102,35 @@ public class AuthController {
     public void signInWithMailAndPassword(String mail, String password, SignInCallback callback) {
         AGConnectAuthCredential credential = EmailAuthProvider.credentialWithPassword(mail, password);
 
-        AGConnectAuth.getInstance().signIn(credential).addOnSuccessListener(signInResult -> {
-            if (signInResult != null) {
-                user.setEmail(signInResult.getUser().getEmail());
-                user.setName(signInResult.getUser().getDisplayName());
-                user.setUid(signInResult.getUser().getUid());
-            }
-            callback.onSignInSuccess(user);
+        try {
+            AGConnectAuth.getInstance().signIn(credential).addOnSuccessListener(signInResult -> {
+                if (signInResult != null) {
+                    user.setEmail(signInResult.getUser().getEmail());
+                    user.setName(signInResult.getUser().getDisplayName());
+                    user.setUid(signInResult.getUser().getUid());
+                }
 
-        }).addOnFailureListener(e -> {
+                callback.onSignInSuccess(user);
 
+            }).addOnFailureListener(e -> {
+                e.printStackTrace();
+                if (e.getMessage() != null && e.getMessage().contains("code: 5")) {
+                    getCurrentUser((success, user) -> {
+                        if (success) {
+                            callback.onSignInSuccess(user);
+                        } else {
+                            callback.onSignInError(e);
+                        }
+
+                    });
+                } else {
+                    callback.onSignInError(e);
+                }
+
+            });
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.out.println("---------"+e.getMessage().contains("code: 5"));
             if (e.getMessage() != null && e.getMessage().contains("code: 5")) {
                 getCurrentUser((success, user) -> {
                     if (success) {
@@ -121,11 +140,9 @@ public class AuthController {
                     }
 
                 });
-            } else {
-                callback.onSignInError(e);
             }
 
-        });
+        }
     }
 
     public User getUser() {

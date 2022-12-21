@@ -90,9 +90,9 @@ async function putBulkPetLocation(params) {
   let result = [];
   for (item of params.data) {
     const values = {
-      PetID: params.PetID,
-      Lat: item[0].toString(),
-      Lng: item[1].toString(),
+      pet_id: params.PetID,
+      lat: item[0].toString(),
+      lon: item[1].toString(),
     };
     const temp = await putPetLocation(values);
     result.push(temp);

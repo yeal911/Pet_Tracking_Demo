@@ -9,6 +9,7 @@ async function getUserByUserId(userId) {
     { filter: "eq", field_name: "userID", field_value: userId },
   ]);
   const item = await database.readItems(query);
+  console.log("---item: "+JSON.stringify(item));
   return item;
 }
 

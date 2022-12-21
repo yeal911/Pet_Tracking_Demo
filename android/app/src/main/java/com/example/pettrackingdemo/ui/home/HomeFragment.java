@@ -222,10 +222,13 @@ public class HomeFragment extends Fragment implements OnMapReadyCallback {
                     pets = values;
                     ArrayAdapter<String> adapter = new ArrayAdapter<>(getContext(),
                             android.R.layout.simple_list_item_1, items);
-                    for (Pet item : values) {
-                        items.add(item.getPetName());
+                    if (values != null){
+                        for (Pet item : values) {
+                            items.add(item.getPetName());
+                        }
+                        binding.idPetSelection.setAdapter(adapter);
                     }
-                    binding.idPetSelection.setAdapter(adapter);
+
                 }
 
                 @Override
